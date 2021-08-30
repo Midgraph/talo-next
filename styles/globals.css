@@ -1,23 +1,32 @@
+/* ./styles/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 html,
 body {
   padding: 0;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell,
-    Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
 }
 
 * {
   box-sizing: border-box;
 }
 
-main {
+.aspect-169 {
+  aspect-ratio: 16 / 9;
+}
+
+/* main {
   padding: 5rem 0;
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-}
+} */
 
 code {
   background: #fafafa;
@@ -32,4 +41,29 @@ code {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+
+.heroDiamond {
+  background: linear-gradient(
+      207.91deg,
+      rgba(255, 255, 255, 0.2) 15.61%,
+      rgba(255, 255, 255, 0) 70.18%
+    ),
+    radial-gradient(
+      104.9% 104.9% at 51.6% 86.41%,
+      rgba(191, 219, 251, 0.3) 0%,
+      rgba(255, 255, 255, 0.3) 100%
+    );
+  mix-blend-mode: normal;
+  backdrop-filter: blur(26px);
+  /* Note: backdrop-filter has minimal browser support */
+  border-radius: 13px;
+}
+
+/* .heroDiamondStroke {
+  background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0) 50%),
+    linear-gradient(315deg, #01488b 0%, rgba(14, 47, 86, 0) 50%);
+} */
+
+.heroDiamondFill {
 }
