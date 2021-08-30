@@ -3,7 +3,7 @@ export default function Header() {
     <>
       <div
         id="Nav"
-        className="w-24 flex flex-col justify-between border-r bg-white border-purple-500 h-full fixed top-0 left-0"
+        className="z-[9999] w-24 flex flex-col justify-between border-r bg-white border-purple-500 h-full fixed top-0 left-0"
       >
         <div
           id="logo"

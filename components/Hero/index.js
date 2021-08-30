@@ -1,10 +1,87 @@
+import ReactDOM from "react-dom";
+import THREE from "three";
+import React, { useRef, useState, Suspense } from "react";
+import { Canvas, useFrame, Vector3 } from "@react-three/fiber";
+import { motion } from "framer-motion";
+import { useLoader } from "@react-three/fiber";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { EXRLoader } from "three/examples/jsm/loaders/EXRLoader";
+import { Environment, useCubeTexture } from "@react-three/drei";
+
+function Asset({ url, props }) {
+  const ref = useRef();
+  const gltf = useLoader(GLTFLoader, url);
+  useFrame((state, delta) => (ref.current.rotation.y += 0.01));
+
+  return (
+    <primitive
+      ref={ref}
+      object={gltf.scene}
+      position={[0, -0, -0]}
+      {...props}
+    />
+  );
+}
+
+function Box(props) {
+  // This reference will give us direct access to the THREE.Mesh object
+  const ref = useRef();
+  // Set up state for the hovered and active state
+  const [hovered, setHover] = useState(false);
+  const [active, setActive] = useState(false);
+  // Subscribe this component to the render-loop, rotate the mesh every frame
+  useFrame((state, delta) => (ref.current.rotation.x += 0.01));
+  // const envMap = useCubeTexture(
+  //   [
+  //     "warhead.png",
+  //     "warhead.png",
+  //     "warhead.png",
+  //     "warhead.png",
+  //     "warhead.png",
+  //     "warhead.png",
+  //   ],
+  //   {
+  //     path: "images/",
+  //   }
+  // );
+  // Return the view, these are regular Threejs elements expressed in JSX
+  return (
+    <>
+      <mesh
+        {...props}
+        ref={ref}
+        scale={active ? 1.5 : 1}
+        onClick={(event) => setActive(!active)}
+        onPointerOver={(event) => setHover(true)}
+        onPointerOut={(event) => setHover(false)}
+      >
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial
+          metalness={hovered ? 2 : 1}
+          roughness={hovered ? 0 : 0.1}
+          // refractionRatio={0.98}
+          // reflectivity={0.9}
+          envMapIntensity={1}
+          color={0xccddff}
+        />
+        {/* <meshPhongMaterial
+          // color={0xccddff}
+          envMap={envMap}
+          refractionRatio={0.5}
+          reflectivity={0.9}
+        /> */}
+      </mesh>
+    </>
+  );
+}
+
 export default function Hero() {
   return (
     <>
       <section className="w-screen h-screen pl-24 flex narrow:flex-col-reverse items-center justify-center relative overflow-hidden ">
         <div
           id="heroContent"
-          className="w-1/2 narrow:w-full px-6 flex flex-col justify-center items-end narrow:h-2/5 narrow:items-center narrow:justify-end narrow:pb-8"
+          className="w-1/2 narrow:w-full px-6 flex flex-col justify-center items-end narrow:h-auto narrow:items-center narrow:justify-end narrow:pb-8"
         >
           <div class="narrow:w-full flex flex-col gap-8 items-start ">
             <h1 className="wide:text-[calc(3*1vw)] narrow:text-[calc(4*1vw)] font-400 font-favorit">
@@ -35,13 +112,35 @@ export default function Hero() {
             </button>
           </div>
         </div>
-        <div id="heroImage" className="w-1/2 relative narrow:h-3/5">
+        <div id="noise"></div>
+        <Canvas className="!absolute w-full h-full ">
+          <ambientLight />
+          <pointLight position={[10, 10, 10]} />
+          <Box position={[-1.2, 0, 0]} />
+          <Box position={[1.2, 0, 0]} />
+          <Box position={[0, 0, 0]} />
+
+          {/* <Asset url="3d/warhead.gltf" /> */}
+          <Suspense fallback={null}>
+            {/* <Asset url="3d/covid.glb" /> */}
+            <Environment
+              background={false}
+              path="/"
+              preset={"sunset"}
+              scene={undefined} // adds the ability to pass a custom THREE.Scene
+            />
+          </Suspense>
+        </Canvas>
+        <div
+          id="heroImage"
+          className="w-1/2 narrow:w-full relative narrow:h-full"
+        >
           <img
             src="images/warhead.png"
-            className="w-[calc((40vw-2.5rem-3rem))] h-[calc((40vw-2.5rem-3rem))] aspect-h-1 absolute top-1/2 left-1/2 transform  -translate-x-1/2 -translate-y-1/2"
+            className="w-[calc((40vw-2.5rem-3rem))] h-[calc((40vw-2.5rem-3rem))] narrow:w-[calc((60vh-2.5rem-3rem))] narrow:h-[calc((60vh-2.5rem-3rem))] aspect-h-1 absolute top-1/2 left-1/2 transform  -translate-x-1/2 -translate-y-1/2"
             alt=""
           />
-          <div className="w-[calc((40vw-2.5rem-3rem)*0.7071)] h-[calc((40vw-2.5rem-3rem)*0.7071)] aspect-h-1 absolute top-1/2 left-1/2 bg-black transform -rotate-45 z-[-1] -translate-x-1/2 -translate-y-1/2 heroDiamond flex items-center justify-center">
+          <div className="w-[calc((40vw-2.5rem-3rem)*0.7071)] h-[calc((40vw-2.5rem-3rem)*0.7071)]  narrow:w-[calc((60vh-2.5rem-3rem)*0.7)] narrow:h-[calc((60vh-2.5rem-3rem)*0.7)] aspect-h-1 absolute top-1/2 left-1/2 bg-black transform -rotate-45 z-[-1] -translate-x-1/2 -translate-y-1/2 heroDiamond flex items-center justify-center">
             <svg
               width="100%"
               height="100%"
@@ -141,14 +240,89 @@ export default function Hero() {
           </video> */}
           <div
             className="h-full relative w-full filter  
-            blur-[250px] 
+            blur-[150px] opacity-50
           "
           >
-            <div className="z-[4] h-[25vw] w-[25vw] rounded-full bg-blue-600 absolute top-[20%] left-[90%] transform -translate-x-1/2 -translate-y-1/2"></div>
-            <div className="z-[5] h-[40vw] w-[40vw] rounded-full bg-blue-300 absolute top-0 left-[60%] transform -translate-x-1/2 -translate-y-1/2"></div>
-            <div className="z-[6] h-[35vw] w-[35vw] rounded-full bg-white absolute top-[50%] left-[65%] transform -translate-x-1/2 -translate-y-1/2"></div>
-            {/* <div className=" z-[2] h-[35vw] w-[35vw] rounded-full bg-purple-500 absolute top-full left-[40%] transform -translate-x-1/2 -translate-y-1/2"></div>
-            <div className="z-[1] h-[35vw] w-[35vw] rounded-full bg-blue-200 absolute top-[80%] left-[5%] transform -translate-x-1/2 -translate-y-1/2"></div> */}
+            <motion.div
+              animate={{ x: 100, y: -100, scale: 2 }}
+              transition={{
+                ease: "easeInOut",
+                duration: 4,
+                repeat: Infinity,
+                repeatType: "reverse",
+              }}
+              className="z-[4] h-[25vw] w-[25vw] rounded-full bg-blue-600 absolute top-[20%] left-[90%] transform -translate-x-1/2 -translate-y-1/2"
+            ></motion.div>
+            <motion.div
+              animate={{ x: -200, y: 200, opacity: 0.8, scale: 0.8 }}
+              transition={{
+                ease: "easeInOut",
+                duration: 3,
+                repeat: Infinity,
+                repeatType: "reverse",
+              }}
+              className="z-[5] h-[40vw] w-[40vw] rounded-full bg-blue-300 absolute top-0 left-[60%] transform -translate-x-1/2 -translate-y-1/2"
+            ></motion.div>
+            <motion.div
+              animate={{ x: -100, y: -200, scale: -0.5 }}
+              transition={{
+                ease: "easeInOut",
+                duration: 2,
+                repeat: Infinity,
+                repeatType: "reverse",
+              }}
+              className="z-[6] h-[35vw] w-[35vw] rounded-full bg-white absolute top-[50%] left-[65%] transform -translate-x-1/2 -translate-y-1/2"
+            ></motion.div>
+            <motion.div
+              animate={{ x: -100, y: -100, scale: 2 }}
+              transition={{
+                ease: "easeInOut",
+                duration: 4,
+                repeat: Infinity,
+                repeatType: "reverse",
+              }}
+              className="z-[4] h-[25vw] w-[25vw] rounded-full bg-blue-600 absolute top-[20%] left-[90%] transform -translate-x-1/2 -translate-y-1/2"
+            ></motion.div>
+            <motion.div
+              animate={{ x: 200, y: -200, opacity: 0.8, scale: 0.8 }}
+              transition={{
+                ease: "easeInOut",
+                duration: 3,
+                repeat: Infinity,
+                repeatType: "reverse",
+              }}
+              className="z-[5] h-[40vw] w-[40vw] rounded-full bg-blue-300 absolute top-0 left-[60%] transform -translate-x-1/2 -translate-y-1/2"
+            ></motion.div>
+            <motion.div
+              animate={{ x: -100, y: -200, scale: -0.5 }}
+              transition={{
+                ease: "easeInOut",
+                duration: 2,
+                repeat: Infinity,
+                repeatType: "reverse",
+              }}
+              className="z-[6] h-[35vw] w-[35vw] rounded-full bg-white absolute top-[50%] left-[65%] transform -translate-x-1/2 -translate-y-1/2"
+            ></motion.div>
+            <motion.div
+              animate={{ x: -100, y: -100, scale: -0.5 }}
+              transition={{
+                ease: "easeInOut",
+                duration: 3,
+                repeat: Infinity,
+                repeatType: "reverse",
+              }}
+              className=" z-[2] h-[35vw] w-[35vw] rounded-full bg-purple-500 absolute top-full left-[40%] transform -translate-x-1/2 -translate-y-1/2"
+            ></motion.div>
+            <motion.div
+              animate={{ x: -100, y: -200, scale: 2 }}
+              transition={{
+                ease: "easeInOut",
+                duration: 4,
+                repeat: Infinity,
+                repeatType: "reverse",
+              }}
+              className="z-[1] h-[35vw] w-[35vw] rounded-full bg-blue-200 absolute top-[80%] left-[5%] transform -translate-x-1/2 -translate-y-1/2"
+            ></motion.div>
           </div>
         </div>
       </section>
